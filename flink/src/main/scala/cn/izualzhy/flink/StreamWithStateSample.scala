@@ -13,16 +13,17 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011
 import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema
 
 /**
- * Description:
+ * Description: 订阅 Kafka 的 json 数据，解析其中的 weight 字段，记录收到的各个 weight 的次数。
  *
  */
-object StateSample extends App {
+object StreamWithStateSample extends App {
   val params = ParameterTool.fromArgs(args)
   val env = StreamExecutionEnvironment.getExecutionEnvironment
-  val fsStateBackend = new FsStateBackend(params.get("ckdir"))
+  val fsStateBackend = new FsStateBackend(params.get("ckdir", "file:///tmp"))
   env.setStateBackend(fsStateBackend)
   env.enableCheckpointing(60000)
   env.getCheckpointConfig.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
+  env.getConfig.setLatencyTrackingInterval(60000)
 
   val properties = new Properties()
   properties.setProperty("bootstrap.servers", s"${params.get("brokers")}")
@@ -39,6 +40,8 @@ object StateSample extends App {
     .map(new CountFunction)
     .uid("count_uid")
     .print()
+
+//  println(env.getExecutionPlan)
 
   env.execute()
 

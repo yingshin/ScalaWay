@@ -12,7 +12,8 @@
     <artifactId>flink-sample</artifactId>
 
     <properties>
-        <flink.version>1.11.0</flink.version>
+<!--        <flink.version>1.11.0</flink.version>-->
+        <flink.version>1.9.1</flink.version>
     </properties>
 
     <dependencies>
@@ -52,13 +53,16 @@
             <artifactId>flink-metrics-dropwizard</artifactId>
             <version>${flink.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-json</artifactId>
             <version>${flink.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-csv</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
@@ -81,6 +85,11 @@
             <artifactId>flink-state-processor-api_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-hbase_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
