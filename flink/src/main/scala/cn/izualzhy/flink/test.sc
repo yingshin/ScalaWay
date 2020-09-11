@@ -1,25 +1,16 @@
-class S(s: String) {
-  override def toString: String = s"|${s}|"
-}
+val s1 = "bootstrap.server"
+val s2 = "topic"
+val s3 = "primary_key"
+val m = Map(
+  s1 -> "1.2.3.4",
+  s2 -> "ufo",
+  "primary_key" -> "uid",
+  "a" -> 1
+)
 
-trait A {
-  val s: S
 
-  def bar() = println(s)
-}
+Map("1"->"2", "3"->"4") ++ m.get(s3).map("connector.kafka.key" -> _.toString)
 
-class B(val s: S) extends A {
-  def foo() = {
-    println(s)
-  }
-}
-
-class C(override val s: S) extends B(s) {
-//  class C(s: S) extends B(s) {
-  def h() = println(s)
-}
-
-val c = new C(new S("hello world"))
-c.h()
-c.foo()
-c.bar()
+val s = "uid"
+s.split("\\.").tail
+s.split("\\.").last

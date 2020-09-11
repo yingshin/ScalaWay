@@ -1,4 +1,5 @@
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor, ValueState, ValueStateDescriptor}
+import org.apache.flink.api.common.typeinfo.Types
 import org.apache.flink.api.java.ExecutionEnvironment
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
@@ -25,9 +26,11 @@ object TestReadState extends App {
 
     @throws[Exception]
     override def open(parameters: Configuration): Unit = {
+//      val stateDescriptor = new ValueStateDescriptor("state", Types.INT)
       val stateDescriptor = new ValueStateDescriptor("state", createTypeInformation[Int])
       state = getRuntimeContext().getState(stateDescriptor)
 
+//      val updateDescriptor = new ListStateDescriptor("times", Types.LONG)
       val updateDescriptor = new ListStateDescriptor("times", createTypeInformation[Long])
       updateTimes = getRuntimeContext().getListState(updateDescriptor)
     }

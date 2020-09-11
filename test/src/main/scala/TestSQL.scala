@@ -7,42 +7,31 @@ import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.table.api.EnvironmentSettings
+import org.apache.flink.table.api._
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.scala._
+import org.apache.flink.types.Row
 import org.apache.flink.util.Collector
-
-class StatefulFunctionWithTime extends KeyedProcessFunction[Int, Int, Void] {
-  var state: ValueState[Int] = _
-  var updateTimes: ListState[Long] = _
-
-  @throws[Exception]
-  override def open(parameters: Configuration): Unit = {
-    val stateDescriptor = new ValueStateDescriptor("state", createTypeInformation[Int])
-//    val stateDescriptor = new ValueStateDescriptor("state", Types.INT)
-    state = getRuntimeContext().getState(stateDescriptor)
-
-    val updateDescriptor = new ListStateDescriptor("times", createTypeInformation[Long])
-//    val updateDescriptor = new ListStateDescriptor("times", Types.LONG)
-    updateTimes = getRuntimeContext().getListState(updateDescriptor)
-  }
-
-  @throws[Exception]
-  override def processElement(value: Int, ctx: KeyedProcessFunction[ Int, Int, Void ]#Context, out: Collector[Void]): Unit = {
-    state.update(value + 1)
-    updateTimes.add(System.currentTimeMillis)
-  }
-}
 
 object KeyedStateSample extends App {
   val env = StreamExecutionEnvironment.getExecutionEnvironment
-  val fsStateBackend = new FsStateBackend("file:///tmp/chk_dir")
-  env.setStateBackend(fsStateBackend)
-  env.enableCheckpointing(60000)
-  env.getCheckpointConfig.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
+  val fsSettings = EnvironmentSettings.newInstance().useOldPlanner().inStreamingMode().build()
+  val tEnv = StreamTableEnvironment.create(env, fsSettings)
 
-  env.socketTextStream("127.0.0.1", 8010)
-    .map(_.toInt)
-    .keyBy(i => i)
-    .process(new StatefulFunctionWithTime)
-    .uid("my-uid")
+  val sourceStream = env.socketTextStream("127.0.0.1", 8010)
+      .map{v =>
+        val columns = v.split(" ")
+        (columns(0).toInt, columns(1), columns(2))
+      }
+
+//  val a = tEnv.fromDataStream(sourceStream, $"id", $"optype", $"tid")
+  tEnv.registerDataStream("a", sourceStream, $"id", $"optype", $"tid")
+  tEnv.sqlQuery(
+    """
+      |SELECT *, COLLECT(id) FROM a
+      |""".stripMargin
+  ).toAppendStream[Row].print()
 
   env.execute()
 }

@@ -23,6 +23,7 @@ object SourceSinkStateSample extends App {
   class StateSource extends SourceFunction[String] with CheckpointedFunction with CheckpointListener {
     private val log = logPrint(getClass.getSimpleName)_
     override def run(ctx: SourceFunction.SourceContext[String]): Unit = {
+      log(s"${Thread.currentThread().getStackTrace}")
       (1 to 10000).foreach{i =>
         log(s"send:${i}")
         ctx.collect(i.toString)
