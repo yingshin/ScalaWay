@@ -19,6 +19,7 @@
 
     <modules>
         <module>flink</module>
+        <module>flink_1_11</module>
         <module>spary</module>
     </modules>
 
@@ -62,7 +63,6 @@
             <version>3.0.0-SNAP13</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.scalaj</groupId>
             <artifactId>scalaj-http_${scala.binary.version}</artifactId>

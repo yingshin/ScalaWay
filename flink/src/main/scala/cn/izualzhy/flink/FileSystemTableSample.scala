@@ -42,7 +42,6 @@ object FileSystemTableSample extends App {
   tEnv.sqlUpdate(fileSinkTable)
 
   tEnv.sqlQuery("SELECT * FROM a")
-      .addSink()
 
   env.execute("test")
 
